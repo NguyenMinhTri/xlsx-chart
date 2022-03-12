@@ -820,7 +820,8 @@ var Chart = Backbone.Model.extend ({
 			if (me.chartTitle) {
 				me.writeTitle (o, me.chartTitle, chartOpts);
 			};
-			me.write ({file: `xl/charts/chart${chartN}.xml`, object: o});
+			if(!me.chartTitle.toString().toLowerCase().includes('status'))
+				me.write ({file: `xl/charts/chart${chartN}.xml`, object: o});
 			cb ();
 		});
 	},
