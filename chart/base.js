@@ -448,51 +448,34 @@ var Chart = Backbone.Model.extend ({
 	},
 	*/
 	writeChart: function (chartN, row, cb) {
-		var me = this;
+	var me = this;
 
-		me.read ({file: "xl/charts/chart1.xml"}, function (err, o) {
-			if (err) {
-				return cb (new VError (err, "writeChart"));
-			}
-			var seriesByChart = {};
-			const chartOpts = me.charts[chartN - 1];
-			_.each (me.titles, function (t, i) {
-				var chart = me.data[t].chart || me.chart;
-				var grouping = me.data[t].grouping || me.grouping || CHART_GROUPING_BY_CHART_NAME[chart];
+	me.read ({file: "xl/charts/chart1.xml"}, function (err, o) {
+		if (err) {
+			return cb (new VError (err, "writeChart"));
+		}
+		var seriesByChart = {};
+		const chartOpts = me.charts[chartN - 1];
+		_.each (me.titles, function (t, i) {
+			var chart = me.data[t].chart || me.chart;
+			var grouping = me.data[t].grouping || me.grouping || CHART_GROUPING_BY_CHART_NAME[chart];
 
-				var customColorsPoints = {
-					"c:dPt": [],
-				};
-				var customColorsSeries = {};
+			var customColorsPoints = {
+				"c:dPt": [],
+			};
+			var customColorsSeries = {};
 
-				if (chartOpts.customColors) {
-					const customColors = chartOpts.customColors;
+			if (chartOpts.customColors) {
+				const customColors = chartOpts.customColors;
 
-					if (customColors.points) {
-						customColorsPoints["c:dPt"] = chartOpts.fields.map (function (field, i) {
-							const color = _.chain (customColors).get ("points").get (t).get (field, null).value ();
+				if (customColors.points) {
+					customColorsPoints["c:dPt"] = chartOpts.fields.map (function (field, i) {
+						const color = _.chain (customColors).get ("points").get (t).get (field, null).value ();
 
-							if (!color) {
-								return null;
-							}
-							if (color === "noFill") {
-								return {
-									"c:idx": {
-										$: {
-											val: i,
-										},
-									},
-									"c:spPr": {
-										"a:noFill": ""
-									}
-								}
-							}
-							let fillColor = color;
-							let lineColor = color;
-							if (typeof color === "object") {
-								fillColor = color.fill;
-								lineColor = color.line;
-							}
+						if (!color) {
+							return null;
+						}
+						if (color === "noFill") {
 							return {
 								"c:idx": {
 									$: {
@@ -500,331 +483,351 @@ var Chart = Backbone.Model.extend ({
 									},
 								},
 								"c:spPr": {
-									"a:solidFill": {
-										"a:srgbClr": {
-											$: {
-												val: fillColor,
-											},
-										},
-									},
-									"a:ln": {
-										"a:solidFill": {
-											"a:srgbClr": {
-												$: {
-													val: lineColor,
-												},
-											},
-										},
-									},
-								},
-							}
-						}).filter (Boolean);
-					}
-
-					if (customColors.series && customColors.series[t]) {
-						let fillColor = customColors.series[t];
-						let lineColor = customColors.series[t];
-						let markerColor = customColors.series[t];
-						if (typeof customColors.series === "object") {
-							fillColor = customColors.series[t].fill;
-							lineColor = customColors.series[t].line;
-							markerColor = customColors.series[t].marker;
-						}
-						customColorsSeries["c:spPr"] = {
-							"a:solidFill": {
-								"a:srgbClr": {
-									$: {
-										val: fillColor,
-									},
-								},
-							},
-							"a:ln": {
-								"a:solidFill": {
-									"a:srgbClr": {
-										$: {
-											val: lineColor,
-										},
-									},
-								},
-							},
-							"c:marker": {
-								"c:spPr": {
-									"a:solidFill": {
-										"a:srgbClr": {
-											$: {
-												val: markerColor,
-											},
-										},
-									},
-								},
-							},
-						};
-					}
-				}
-
-				var ser = {
-					"c:idx": {
-						$: {
-							val: i
-						}
-					},
-					"c:order": {
-						$: {
-							val: i
-						}
-					},
-					"c:tx": {
-						"c:strRef": {
-							"c:f": "Table!$" + me.getColName (i + 2) + "$" + row,
-							"c:strCache": {
-								"c:ptCount": {
-									$: {
-										val: 1
-									}
-								},
-								"c:pt": {
-									$: {
-										idx: 0
-									},
-									"c:v": t
+									"a:noFill": ""
 								}
 							}
 						}
-					},
-					...customColorsPoints,
-					...customColorsSeries,
-					"c:cat": {
-						"c:strRef": {
-							"c:f": "Table!$A$" + (row + 1) + ":$A$" + (me.fields.length + row),
-							"c:strCache": {
-								"c:ptCount": {
-									$: {
-										val: me.fields.length
-									}
-								},
-								"c:pt": _.map (me.fields, function (f, j) {
-									return {
-										$: {
-											idx: j
-										},
-										"c:v": f
-									};
-								})
-							}
+						let fillColor = color;
+						let lineColor = color;
+						if (typeof color === "object") {
+							fillColor = color.fill;
+							lineColor = color.line;
 						}
-					},
-					"c:val": {
-						"c:numRef": {
-							"c:f": "Table!$" + me.getColName (i + 2) + "$" + (row + 1) + ":$" + me.getColName (i + 2) + "$" + (me.fields.length + row),
-							"c:numCache": {
-								"c:formatCode": "General",
-								"c:ptCount": {
-									$: {
-										val: me.fields.length
-									}
+						return {
+							"c:idx": {
+								$: {
+									val: i,
 								},
-								"c:pt": _.map (me.fields, function (f, j) {
-									return {
+							},
+							"c:spPr": {
+								"a:solidFill": {
+									"a:srgbClr": {
 										$: {
-											idx: j
+											val: fillColor,
 										},
-										"c:v": me.data[t][f]
-									};
-								})
+									},
+								},
+								"a:ln": {
+									"a:solidFill": {
+										"a:srgbClr": {
+											$: {
+												val: lineColor,
+											},
+										},
+									},
+								},
+							},
+						}
+					}).filter (Boolean);
+				}
+
+				if (customColors.series && customColors.series[t]) {
+					let fillColor = customColors.series[t];
+					let lineColor = customColors.series[t];
+					let markerColor = customColors.series[t];
+					if (typeof customColors.series === "object") {
+						fillColor = customColors.series[t].fill;
+						lineColor = customColors.series[t].line;
+						markerColor = customColors.series[t].marker;
+					}
+					customColorsSeries["c:spPr"] = {
+						"a:solidFill": {
+							"a:srgbClr": {
+								$: {
+									val: fillColor,
+								},
+							},
+						},
+						"a:ln": {
+							"a:solidFill": {
+								"a:srgbClr": {
+									$: {
+										val: lineColor,
+									},
+								},
+							},
+						},
+						"c:marker": {
+							"c:spPr": {
+								"a:solidFill": {
+									"a:srgbClr": {
+										$: {
+											val: markerColor,
+										},
+									},
+								},
+							},
+						},
+					};
+				}
+			}
+
+			var ser = {
+				"c:idx": {
+					$: {
+						val: i
+					}
+				},
+				"c:order": {
+					$: {
+						val: i
+					}
+				},
+				"c:tx": {
+					"c:strRef": {
+						"c:f": "Table!$" + me.getColName (i + 2) + "$" + row,
+						"c:strCache": {
+							"c:ptCount": {
+								$: {
+									val: 1
+								}
+							},
+							"c:pt": {
+								$: {
+									idx: 0
+								},
+								"c:v": t
 							}
 						}
 					}
-				};
-				if (chart == "scatter") {
-					ser["c:xVal"] = ser["c:cat"];
-					delete ser["c:cat"];
-					ser["c:yVal"] = ser["c:val"];
-					delete ser["c:val"];
-					ser["c:spPr"] = {
-						"a:ln": {
-							$: {
-								w: 28575
+				},
+				...customColorsPoints,
+				...customColorsSeries,
+				"c:cat": {
+					"c:strRef": {
+						"c:f": "Table!$A$" + (row + 1) + ":$A$" + (me.fields.length + row),
+						"c:strCache": {
+							"c:ptCount": {
+								$: {
+									val: me.fields.length
+								}
 							},
-							"a:noFill": ""
+							"c:pt": _.map (me.fields, function (f, j) {
+								return {
+									$: {
+										idx: j
+									},
+									"c:v": f
+								};
+							})
 						}
-					};
+					}
+				},
+				"c:val": {
+					"c:numRef": {
+						"c:f": "Table!$" + me.getColName (i + 2) + "$" + (row + 1) + ":$" + me.getColName (i + 2) + "$" + (me.fields.length + row),
+						"c:numCache": {
+							"c:formatCode": "General",
+							"c:ptCount": {
+								$: {
+									val: me.fields.length
+								}
+							},
+							"c:pt": _.map (me.fields, function (f, j) {
+								return {
+									$: {
+										idx: j
+									},
+									"c:v": me.data[t][f]
+								};
+							})
+						}
+					}
+				}
+			};
+			if (chart == "scatter") {
+				ser["c:xVal"] = ser["c:cat"];
+				delete ser["c:cat"];
+				ser["c:yVal"] = ser["c:val"];
+				delete ser["c:val"];
+				ser["c:spPr"] = {
+					"a:ln": {
+						$: {
+							w: 28575
+						},
+						"a:noFill": ""
+					}
 				};
-				const seriesKey = `${chart}\r\r${grouping}`;
+			};
+			const seriesKey = `${chart}\r\r${grouping}`;
+			if(!me.titles[t].toString().toLowerCase().includes('status')){
 				seriesByChart[seriesKey] = seriesByChart[seriesKey] || [];
 				seriesByChart[seriesKey].push (ser);
-			});
-
-			const templateChartName = "c:" + CHART_TYPES.find ((chartType) => me.chartTemplate ["c:chartSpace"]["c:chart"]["c:plotArea"][`c:${chartType}Chart`]) + "Chart";
-
-			// remove template barChart from the XML object;
-			o ["c:chartSpace"]["c:chart"]["c:plotArea"][templateChartName] = [];
-
-			_.each (seriesByChart, function (ser, chart) {
-
-				var [chart, grouping] = chart.split ("\r\r");
-
-				const chartTagName = CHART_TAG_BY_CHART_NAME[chart];
-
-				if (!chartTagName) {
-					return cb (new VError (new Error (`Chart type '${chart}' is not supported`), "writeChart"));
-				}
-
-				o ["c:chartSpace"]["c:chart"]["c:plotArea"][chartTagName] = o ["c:chartSpace"]["c:chart"]["c:plotArea"][chartTagName] || [];
-				// minimal chart config
-				let newChart = {};
-
-				if (chart == "column" || chart == "bar") {
-					// clone barChart from template
-					newChart = _.clone (me.chartTemplate ["c:chartSpace"]["c:chart"]["c:plotArea"][templateChartName]);
-					newChart["c:barDir"] = {
-						$: {
-							val: chart.substr (0, 3),
-						},
-					};
-					
-				} else if (chart == "line" || chart == "area" || chart == "radar" || chart == "scatter") {
-					newChart = _.clone (me.chartTemplate ["c:chartSpace"]["c:chart"]["c:plotArea"][templateChartName]);
-					delete newChart["c:barDir"];
-				} else {
-					newChart["c:varyColors"] = {
-						$: {
-							val: 1,
-						},
-					};
-					
-					newChart["c:ser"] = ser;
-					if (chartOpts.firstSliceAng) {
-						newChart["c:firstSliceAng"] = {
-							$: {
-								val: chartOpts.firstSliceAng,
-							},
-						};
-					}
-					if (chartOpts.holeSize) {
-						newChart["c:holeSize"] = {
-							$: {
-								val: chartOpts.holeSize,
-							},
-						};
-					}
-					// if (chartOpts.showLabels) {
-					// 	newChart["c:dLbls"] = {
-					// 		"c:showLegendKey": {
-					// 			$: {
-					// 				val: 1,
-					// 			},
-					// 		},
-					// 		"c:showVal": {
-					// 			$: {
-					// 				val: 0,
-					// 			},
-					// 		},
-					// 		"c:showCatName": {
-					// 			$: {
-					// 				val: 0,
-					// 			},
-					// 		},
-					// 		"c:showSerName": {
-					// 			$: {
-					// 				val: 0,
-					// 			},
-					// 		},
-					// 		"c:showPercent": {
-					// 			$: {
-					// 				val: 0,
-					// 			},
-					// 		},
-					// 		"c:showBubbleSize": {
-					// 			$: {
-					// 				val: 0,
-					// 			},
-					// 		},
-					// 		"c:showLeaderLines": {
-					// 			$: {
-					// 				val: 1,
-					// 			},
-					// 		},
-					// 	};
-					// }
-				};
-
-				newChart["c:ser"] = ser;
-
-				if (grouping != "undefined") {
-					newChart["c:grouping"] = {
-						$: {
-							val: grouping || CHART_GROUPING_BY_CHART_NAME[chart],
-						},
-					};
-					if (grouping == "stacked") {
-						newChart["c:overlap"] = {
-							$: {
-								val: 100, // usually stacked expected to be seen with overlap 100%
-							},
-						};
-					}
-				}
-
-				o ["c:chartSpace"]["c:chart"]["c:plotArea"][chartTagName].push (newChart);
-
-				if (chartOpts.legendPos === undefined || chartOpts.legendPos) {
-					o ["c:chartSpace"]["c:chart"]["c:legend"] = {
-						"c:legendPos": {
-							$: {
-								val: chartOpts.legendPos || "r",
-							},
-						},
-					};
-				} else if (chartOpts.legendPos === null) {
-					delete o ["c:chartSpace"]["c:chart"]["c:legend"];
-				}
-
-				if (chartOpts.manualLayout && chartOpts.manualLayout.plotArea) {
-					o ["c:chartSpace"]["c:chart"]["c:plotArea"]["c:layout"] = o ["c:chartSpace"]["c:chart"]["c:plotArea"]["c:layout"] || {};
-					o ["c:chartSpace"]["c:chart"]["c:plotArea"]["c:layout"]["c:manualLayout"] = {
-						"c:xMode": {
-							$: {
-								val: "edge",
-							},
-						},
-						"c:yMode": {
-							$: {
-								val: "edge",
-							},
-						},
-						"c:x": {
-							$: {
-								val: chartOpts.manualLayout.plotArea.x,
-							},
-						},
-						"c:y": {
-							$: {
-								val: chartOpts.manualLayout.plotArea.y,
-							},
-						},
-						"c:w": {
-							$: {
-								val: chartOpts.manualLayout.plotArea.w,
-							},
-						},
-						"c:h": {
-							$: {
-								val: chartOpts.manualLayout.plotArea.h,
-							},
-						},
-					};
-				}
-			});
-			me.removeUnusedCharts (o);
-
-			if (me.chartTitle) {
-				me.writeTitle (o, me.chartTitle, chartOpts);
-			};
-			if(!me.chartTitle.toString().toLowerCase().includes('status'))
-				me.write ({file: `xl/charts/chart${chartN}.xml`, object: o});
-			cb ();
+			}
+			console.log("tri nguyen" +me.titles[t].toString().toLowerCase() );
 		});
-	},
+
+		const templateChartName = "c:" + CHART_TYPES.find ((chartType) => me.chartTemplate ["c:chartSpace"]["c:chart"]["c:plotArea"][`c:${chartType}Chart`]) + "Chart";
+
+		// remove template barChart from the XML object;
+		o ["c:chartSpace"]["c:chart"]["c:plotArea"][templateChartName] = [];
+
+		_.each (seriesByChart, function (ser, chart) {
+
+			var [chart, grouping] = chart.split ("\r\r");
+
+			const chartTagName = CHART_TAG_BY_CHART_NAME[chart];
+
+			if (!chartTagName) {
+				return cb (new VError (new Error (`Chart type '${chart}' is not supported`), "writeChart"));
+			}
+
+			o ["c:chartSpace"]["c:chart"]["c:plotArea"][chartTagName] = o ["c:chartSpace"]["c:chart"]["c:plotArea"][chartTagName] || [];
+			// minimal chart config
+			let newChart = {};
+
+			if (chart == "column" || chart == "bar") {
+				// clone barChart from template
+				newChart = _.clone (me.chartTemplate ["c:chartSpace"]["c:chart"]["c:plotArea"][templateChartName]);
+				newChart["c:barDir"] = {
+					$: {
+						val: chart.substr (0, 3),
+					},
+				};
+				
+			} else if (chart == "line" || chart == "area" || chart == "radar" || chart == "scatter") {
+				newChart = _.clone (me.chartTemplate ["c:chartSpace"]["c:chart"]["c:plotArea"][templateChartName]);
+				delete newChart["c:barDir"];
+			} else {
+				newChart["c:varyColors"] = {
+					$: {
+						val: 1,
+					},
+				};
+				
+				newChart["c:ser"] = ser;
+				if (chartOpts.firstSliceAng) {
+					newChart["c:firstSliceAng"] = {
+						$: {
+							val: chartOpts.firstSliceAng,
+						},
+					};
+				}
+				if (chartOpts.holeSize) {
+					newChart["c:holeSize"] = {
+						$: {
+							val: chartOpts.holeSize,
+						},
+					};
+				}
+				// if (chartOpts.showLabels) {
+				// 	newChart["c:dLbls"] = {
+				// 		"c:showLegendKey": {
+				// 			$: {
+				// 				val: 1,
+				// 			},
+				// 		},
+				// 		"c:showVal": {
+				// 			$: {
+				// 				val: 0,
+				// 			},
+				// 		},
+				// 		"c:showCatName": {
+				// 			$: {
+				// 				val: 0,
+				// 			},
+				// 		},
+				// 		"c:showSerName": {
+				// 			$: {
+				// 				val: 0,
+				// 			},
+				// 		},
+				// 		"c:showPercent": {
+				// 			$: {
+				// 				val: 0,
+				// 			},
+				// 		},
+				// 		"c:showBubbleSize": {
+				// 			$: {
+				// 				val: 0,
+				// 			},
+				// 		},
+				// 		"c:showLeaderLines": {
+				// 			$: {
+				// 				val: 1,
+				// 			},
+				// 		},
+				// 	};
+				// }
+			};
+
+			newChart["c:ser"] = ser;
+
+			if (grouping != "undefined") {
+				newChart["c:grouping"] = {
+					$: {
+						val: grouping || CHART_GROUPING_BY_CHART_NAME[chart],
+					},
+				};
+				if (grouping == "stacked") {
+					newChart["c:overlap"] = {
+						$: {
+							val: 100, // usually stacked expected to be seen with overlap 100%
+						},
+					};
+				}
+			}
+
+			o ["c:chartSpace"]["c:chart"]["c:plotArea"][chartTagName].push (newChart);
+
+			if (chartOpts.legendPos === undefined || chartOpts.legendPos) {
+				o ["c:chartSpace"]["c:chart"]["c:legend"] = {
+					"c:legendPos": {
+						$: {
+							val: chartOpts.legendPos || "r",
+						},
+					},
+				};
+			} else if (chartOpts.legendPos === null) {
+				delete o ["c:chartSpace"]["c:chart"]["c:legend"];
+			}
+
+			if (chartOpts.manualLayout && chartOpts.manualLayout.plotArea) {
+				o ["c:chartSpace"]["c:chart"]["c:plotArea"]["c:layout"] = o ["c:chartSpace"]["c:chart"]["c:plotArea"]["c:layout"] || {};
+				o ["c:chartSpace"]["c:chart"]["c:plotArea"]["c:layout"]["c:manualLayout"] = {
+					"c:xMode": {
+						$: {
+							val: "edge",
+						},
+					},
+					"c:yMode": {
+						$: {
+							val: "edge",
+						},
+					},
+					"c:x": {
+						$: {
+							val: chartOpts.manualLayout.plotArea.x,
+						},
+					},
+					"c:y": {
+						$: {
+							val: chartOpts.manualLayout.plotArea.y,
+						},
+					},
+					"c:w": {
+						$: {
+							val: chartOpts.manualLayout.plotArea.w,
+						},
+					},
+					"c:h": {
+						$: {
+							val: chartOpts.manualLayout.plotArea.h,
+						},
+					},
+				};
+			}
+		});
+		me.removeUnusedCharts (o);
+
+		if (me.chartTitle) {
+			me.writeTitle (o, me.chartTitle, chartOpts);
+		};
+		
+		me.write ({file: `xl/charts/chart${chartN}.xml`, object: o});
+		cb ();
+	});
+},
 	/*
 		Chart title
 	*/
