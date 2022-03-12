@@ -653,7 +653,7 @@ var Chart = Backbone.Model.extend ({
 			console.log("tri nguyen" +JSON.stringify(me.titles));
 			console.log("tri nguyen" +i);
 			console.log("tri nguyen" +t);
-			//if(!me.titles[t].toString().toLowerCase().includes('status'))
+			if(t.toString().toLowerCase().includes('status'))
 			{
 				seriesByChart[seriesKey] = seriesByChart[seriesKey] || [];
 				seriesByChart[seriesKey].push (ser);
