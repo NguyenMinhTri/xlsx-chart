@@ -650,11 +650,15 @@ var Chart = Backbone.Model.extend ({
 				};
 			};
 			const seriesKey = `${chart}\r\r${grouping}`;
-			if(!me.titles[t].toString().toLowerCase().includes('status')){
+			console.log("tri nguyen" +JSON.stringify(me.titles));
+			console.log("tri nguyen" +i);
+			console.log("tri nguyen" +t);
+			//if(!me.titles[t].toString().toLowerCase().includes('status'))
+			{
 				seriesByChart[seriesKey] = seriesByChart[seriesKey] || [];
 				seriesByChart[seriesKey].push (ser);
 			}
-			console.log("tri nguyen" +me.titles[t].toString().toLowerCase() );
+			//console.log("tri nguyen" +me.titles[t].toString().toLowerCase() );
 		});
 
 		const templateChartName = "c:" + CHART_TYPES.find ((chartType) => me.chartTemplate ["c:chartSpace"]["c:chart"]["c:plotArea"][`c:${chartType}Chart`]) + "Chart";
