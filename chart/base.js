@@ -457,207 +457,212 @@ var Chart = Backbone.Model.extend ({
 		var seriesByChart = {};
 		const chartOpts = me.charts[chartN - 1];
 		_.each (me.titles, function (t, i) {
-			var chart = me.data[t].chart || me.chart;
-			var grouping = me.data[t].grouping || me.grouping || CHART_GROUPING_BY_CHART_NAME[chart];
+            try{
+                var chart = me.data[t].chart || me.chart;
+                var grouping = me.data[t].grouping || me.grouping || CHART_GROUPING_BY_CHART_NAME[chart];
 
-			var customColorsPoints = {
-				"c:dPt": [],
-			};
-			var customColorsSeries = {};
+                var customColorsPoints = {
+                    "c:dPt": [],
+                };
+                var customColorsSeries = {};
 
-			if (chartOpts.customColors) {
-				const customColors = chartOpts.customColors;
+                if (chartOpts.customColors) {
+                    const customColors = chartOpts.customColors;
 
-				if (customColors.points) {
-					customColorsPoints["c:dPt"] = chartOpts.fields.map (function (field, i) {
-						const color = _.chain (customColors).get ("points").get (t).get (field, null).value ();
+                    if (customColors.points) {
+                        customColorsPoints["c:dPt"] = chartOpts.fields.map (function (field, i) {
+                            const color = _.chain (customColors).get ("points").get (t).get (field, null).value ();
 
-						if (!color) {
-							return null;
-						}
-						if (color === "noFill") {
-							return {
-								"c:idx": {
-									$: {
-										val: i,
-									},
-								},
-								"c:spPr": {
-									"a:noFill": ""
-								}
-							}
-						}
-						let fillColor = color;
-						let lineColor = color;
-						if (typeof color === "object") {
-							fillColor = color.fill;
-							lineColor = color.line;
-						}
-						return {
-							"c:idx": {
-								$: {
-									val: i,
-								},
-							},
-							"c:spPr": {
-								"a:solidFill": {
-									"a:srgbClr": {
-										$: {
-											val: fillColor,
-										},
-									},
-								},
-								"a:ln": {
-									"a:solidFill": {
-										"a:srgbClr": {
-											$: {
-												val: lineColor,
-											},
-										},
-									},
-								},
-							},
-						}
-					}).filter (Boolean);
-				}
+                            if (!color) {
+                                return null;
+                            }
+                            if (color === "noFill") {
+                                return {
+                                    "c:idx": {
+                                        $: {
+                                            val: i,
+                                        },
+                                    },
+                                    "c:spPr": {
+                                        "a:noFill": ""
+                                    }
+                                }
+                            }
+                            let fillColor = color;
+                            let lineColor = color;
+                            if (typeof color === "object") {
+                                fillColor = color.fill;
+                                lineColor = color.line;
+                            }
+                            return {
+                                "c:idx": {
+                                    $: {
+                                        val: i,
+                                    },
+                                },
+                                "c:spPr": {
+                                    "a:solidFill": {
+                                        "a:srgbClr": {
+                                            $: {
+                                                val: fillColor,
+                                            },
+                                        },
+                                    },
+                                    "a:ln": {
+                                        "a:solidFill": {
+                                            "a:srgbClr": {
+                                                $: {
+                                                    val: lineColor,
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            }
+                        }).filter (Boolean);
+                    }
 
-				if (customColors.series && customColors.series[t]) {
-					let fillColor = customColors.series[t];
-					let lineColor = customColors.series[t];
-					let markerColor = customColors.series[t];
-					if (typeof customColors.series === "object") {
-						fillColor = customColors.series[t].fill;
-						lineColor = customColors.series[t].line;
-						markerColor = customColors.series[t].marker;
-					}
-					customColorsSeries["c:spPr"] = {
-						"a:solidFill": {
-							"a:srgbClr": {
-								$: {
-									val: fillColor,
-								},
-							},
-						},
-						"a:ln": {
-							"a:solidFill": {
-								"a:srgbClr": {
-									$: {
-										val: lineColor,
-									},
-								},
-							},
-						},
-						"c:marker": {
-							"c:spPr": {
-								"a:solidFill": {
-									"a:srgbClr": {
-										$: {
-											val: markerColor,
-										},
-									},
-								},
-							},
-						},
-					};
-				}
-			}
+                    if (customColors.series && customColors.series[t]) {
+                        let fillColor = customColors.series[t];
+                        let lineColor = customColors.series[t];
+                        let markerColor = customColors.series[t];
+                        if (typeof customColors.series === "object") {
+                            fillColor = customColors.series[t].fill;
+                            lineColor = customColors.series[t].line;
+                            markerColor = customColors.series[t].marker;
+                        }
+                        customColorsSeries["c:spPr"] = {
+                            "a:solidFill": {
+                                "a:srgbClr": {
+                                    $: {
+                                        val: fillColor,
+                                    },
+                                },
+                            },
+                            "a:ln": {
+                                "a:solidFill": {
+                                    "a:srgbClr": {
+                                        $: {
+                                            val: lineColor,
+                                        },
+                                    },
+                                },
+                            },
+                            "c:marker": {
+                                "c:spPr": {
+                                    "a:solidFill": {
+                                        "a:srgbClr": {
+                                            $: {
+                                                val: markerColor,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        };
+                    }
+                }
 
-			var ser = {
-				"c:idx": {
-					$: {
-						val: i
-					}
-				},
-				"c:order": {
-					$: {
-						val: i
-					}
-				},
-				"c:tx": {
-					"c:strRef": {
-						"c:f": "Table!$" + me.getColName (i + 2) + "$" + row,
-						"c:strCache": {
-							"c:ptCount": {
-								$: {
-									val: 1
-								}
-							},
-							"c:pt": {
-								$: {
-									idx: 0
-								},
-								"c:v": t
-							}
-						}
-					}
-				},
-				...customColorsPoints,
-				...customColorsSeries,
-				"c:cat": {
-					"c:strRef": {
-						"c:f": "Table!$A$" + (row + 1) + ":$A$" + (me.fields.length + row),
-						"c:strCache": {
-							"c:ptCount": {
-								$: {
-									val: me.fields.length
-								}
-							},
-							"c:pt": _.map (me.fields, function (f, j) {
-								return {
-									$: {
-										idx: j
-									},
-									"c:v": f
-								};
-							})
-						}
-					}
-				},
-				"c:val": {
-					"c:numRef": {
-						"c:f": "Table!$" + me.getColName (i + 2) + "$" + (row + 1) + ":$" + me.getColName (i + 2) + "$" + (me.fields.length + row),
-						"c:numCache": {
-							"c:formatCode": "General",
-							"c:ptCount": {
-								$: {
-									val: me.fields.length
-								}
-							},
-							"c:pt": _.map (me.fields, function (f, j) {
-								return {
-									$: {
-										idx: j
-									},
-									"c:v": me.data[t][f]
-								};
-							})
-						}
-					}
-				}
-			};
-			if (chart == "scatter") {
-				ser["c:xVal"] = ser["c:cat"];
-				delete ser["c:cat"];
-				ser["c:yVal"] = ser["c:val"];
-				delete ser["c:val"];
-				ser["c:spPr"] = {
-					"a:ln": {
-						$: {
-							w: 28575
-						},
-						"a:noFill": ""
-					}
-				};
-			};
-			const seriesKey = `${chart}\r\r${grouping}`;
-			console.log("tri nguyen" +JSON.stringify(me.titles));
-			console.log("tri nguyen" +i);
-			console.log("tri nguyen" +t);
-			if(!t.toString().toLowerCase().includes('status'))
-			{
-				seriesByChart[seriesKey] = seriesByChart[seriesKey] || [];
-				seriesByChart[seriesKey].push (ser);
-			}
+                var ser = {
+                    "c:idx": {
+                        $: {
+                            val: i
+                        }
+                    },
+                    "c:order": {
+                        $: {
+                            val: i
+                        }
+                    },
+                    "c:tx": {
+                        "c:strRef": {
+                            "c:f": "Table!$" + me.getColName (i + 2) + "$" + row,
+                            "c:strCache": {
+                                "c:ptCount": {
+                                    $: {
+                                        val: 1
+                                    }
+                                },
+                                "c:pt": {
+                                    $: {
+                                        idx: 0
+                                    },
+                                    "c:v": t
+                                }
+                            }
+                        }
+                    },
+                    ...customColorsPoints,
+                    ...customColorsSeries,
+                    "c:cat": {
+                        "c:strRef": {
+                            "c:f": "Table!$A$" + (row + 1) + ":$A$" + (me.fields.length + row),
+                            "c:strCache": {
+                                "c:ptCount": {
+                                    $: {
+                                        val: me.fields.length
+                                    }
+                                },
+                                "c:pt": _.map (me.fields, function (f, j) {
+                                    return {
+                                        $: {
+                                            idx: j
+                                        },
+                                        "c:v": f
+                                    };
+                                })
+                            }
+                        }
+                    },
+                    "c:val": {
+                        "c:numRef": {
+                            "c:f": "Table!$" + me.getColName (i + 2) + "$" + (row + 1) + ":$" + me.getColName (i + 2) + "$" + (me.fields.length + row),
+                            "c:numCache": {
+                                "c:formatCode": "General",
+                                "c:ptCount": {
+                                    $: {
+                                        val: me.fields.length
+                                    }
+                                },
+                                "c:pt": _.map (me.fields, function (f, j) {
+                                    return {
+                                        $: {
+                                            idx: j
+                                        },
+                                        "c:v": me.data[t][f]
+                                    };
+                                })
+                            }
+                        }
+                    }
+                };
+                if (chart == "scatter") {
+                    ser["c:xVal"] = ser["c:cat"];
+                    delete ser["c:cat"];
+                    ser["c:yVal"] = ser["c:val"];
+                    delete ser["c:val"];
+                    ser["c:spPr"] = {
+                        "a:ln": {
+                            $: {
+                                w: 28575
+                            },
+                            "a:noFill": ""
+                        }
+                    };
+                };
+                const seriesKey = `${chart}\r\r${grouping}`;
+            
+                console.log("tri nguyen" +i);
+                console.log("tri nguyen" +t);
+                if(!t.toString().toLowerCase().includes('status'))
+                {
+                    seriesByChart[seriesKey] = seriesByChart[seriesKey] || [];
+                    seriesByChart[seriesKey].push (ser);
+                }
+            }
+            catch(err) {
+                console.log(err.message);
+              }
 			//console.log("tri nguyen" +me.titles[t].toString().toLowerCase() );
 		});
 
