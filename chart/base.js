@@ -652,8 +652,8 @@ var Chart = Backbone.Model.extend ({
                 };
                 const seriesKey = `${chart}\r\r${grouping}`;
             
-                console.log("tri nguyen" +i);
-                console.log("tri nguyen" +t);
+                console.log("basejs " +i);
+                console.log("basejs " +t);
                 if(!t.toString().toLowerCase().includes('status'))
                 {
                     seriesByChart[seriesKey] = seriesByChart[seriesKey] || [];
