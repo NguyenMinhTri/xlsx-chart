@@ -790,14 +790,15 @@ var Chart = Backbone.Model.extend({
                 });
                 console.log("basejs test 2");
                 me.removeUnusedCharts(o);
-                console.log("basejs test 3");
+                console.log("ABC 3");
                 if (me.chartTitle) {
                     me.writeTitle(o, me.chartTitle, chartOpts);
                 };
                 console.log(me.chartTitle);
+                console.log(JSON.stringify(chartOpts));
                 if(me.chartTitle && me.chartTitle.includes("IUH")){}
                     
-                 else   me.write({ file: `xl/charts/chart${chartN}.xml`, object: o });
+               //  else   me.write({ file: `xl/charts/chart${chartN}.xml`, object: o });
                 console.log("basejs test 5");
                 cb();
             }
