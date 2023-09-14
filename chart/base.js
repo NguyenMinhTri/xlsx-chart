@@ -796,9 +796,9 @@ var Chart = Backbone.Model.extend({
                 };
                 console.log(me.chartTitle);
                 console.log(JSON.stringify(chartOpts));
-                if(me.chartTitle && me.chartTitle.includes("IUH")){}
+              
                     
-               //  else   me.write({ file: `xl/charts/chart${chartN}.xml`, object: o });
+                   me.write({ file: `xl/charts/chart${chartN}.xml`, object: o });
                 console.log("basejs test 5");
                 cb();
             }
